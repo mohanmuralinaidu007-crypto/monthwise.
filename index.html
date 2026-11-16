@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f6f7f4">
+    <meta name="description" content="A simple monthly income and spending tracker.">
+    <title>Monthwise — Income &amp; expenses</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <section id="lock-screen" class="lock-screen" aria-labelledby="lock-title">
+      <div class="lock-card">
+        <div class="lock-brand">
+          <span class="brand-mark" aria-hidden="true">m</span>
+          <span>monthwise</span>
+        </div>
+        <p class="eyebrow">PRIVATE BY DESIGN</p>
+        <h1 id="lock-title">Unlock your money tracker</h1>
+        <p id="lock-description" class="lock-description"></p>
+        <form id="lock-form">
+          <label class="field" for="pin-input">
+            <span>6-digit PIN</span>
+            <input id="pin-input" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="current-password" required>
+          </label>
+          <label id="pin-confirm-field" class="field" for="pin-confirm" hidden>
+            <span>Confirm PIN</span>
+            <input id="pin-confirm" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="new-password">
+          </label>
+          <p id="lock-error" class="form-error" role="alert" hidden></p>
+          <button id="lock-submit" class="primary-button submit-button" type="submit">Unlock</button>
+        </form>
+        <p class="lock-footnote">Your encrypted data stays on this device. If you forget your PIN, it cannot be recovered.</p>
+      </div>
+    </section>
+
+    <main id="app-content" class="app-shell" hidden>
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Monthwise home">
+          <span class="brand-mark" aria-hidden="true">m</span>
+          <span>monthwise</span>
+        </a>
+        <button id="lock-button" class="lock-button" type="button" hidden>Lock</button>
+        <label class="currency-picker">
+          <span class="visually-hidden">Currency</span>
+          <select id="currency" aria-label="Currency">
+            <option value="INR">INR ₹</option>
+            <option value="USD">USD $</option>
+            <option value="EUR">EUR €</option>
+            <option value="GBP">GBP £</option>
+          </select>
+        </label>
+      </header>
+
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">YOUR MONEY, IN FOCUS</p>
+        <h1 id="page-title">Monthly money overview</h1>
+        <p class="intro-copy">Track your income and spending month by month.</p>
+      </section>
+
+      <section class="month-toolbar" aria-label="Choose a month">
+        <button id="previous-month" class="icon-button" type="button" aria-label="Previous month">‹</button>
+        <label class="month-label">
+          <span class="visually-hidden">Selected month</span>
+          <input id="month-picker" type="month">
+        </label>
+        <button id="next-month" class="icon-button" type="button" aria-label="Next month">›</button>
+      </section>
+
+      <p id="notice" class="notice" role="status" hidden></p>
+
+      <section class="overview-grid" aria-label="Monthly totals">
+        <article class="total-card income-card">
+          <div class="card-heading">
+            <span class="card-label">Income</span>
+            <span class="total-icon" aria-hidden="true">↙</span>
+          </div>
+          <p id="monthly-income" class="total-amount">₹0</p>
+          <p id="income-count" class="total-caption">No income this month</p>
+          <div class="total-decoration" aria-hidden="true"></div>
+        </article>
+        <article class="total-card spent-card">
+          <div class="card-heading">
+            <span class="card-label">Spent</span>
+            <span class="total-icon" aria-hidden="true">↗</span>
+          </div>
+          <p id="monthly-spent" class="total-amount">₹0</p>
+          <p id="spent-count" class="total-caption">No spending this month</p>
+          <div class="total-decoration" aria-hidden="true"></div>
+        </article>
+        <article class="total-card balance-card">
+          <div class="card-heading">
+            <span class="card-label">Balance (income − spent)</span>
+            <span class="total-icon" aria-hidden="true">=</span>
+          </div>
+          <p id="monthly-balance" class="total-amount">₹0</p>
+          <p class="total-caption">Income minus spending this month</p>
+          <div class="total-decoration" aria-hidden="true"></div>
+        </article>
+      </section>
+
+      <section class="category-overview" aria-label="Monthly category breakdowns">
+        <article class="category-card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">MONEY IN</p>
+              <h2>Income by category</h2>
+            </div>
+          </div>
+          <div id="income-category-summary" class="category-summary"></div>
+        </article>
+        <article class="category-card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">MONEY OUT</p>
+              <h2>Spending by category</h2>
+            </div>
+          </div>
+          <div id="category-summary" class="category-summary"></div>
+        </article>
+      </section>
+
+      <section class="management-section" aria-labelledby="emi-title">
+        <div class="section-heading management-heading">
+          <div>
+            <p class="eyebrow">MONTHLY COMMITMENTS</p>
+            <h2 id="emi-title">EMIs</h2>
+          </div>
+          <button id="add-emi" class="primary-button" type="button">
+            <span aria-hidden="true">+</span> Add EMI
+          </button>
+        </div>
+        <div class="summary-strip emi-summary">
+          <div class="summary-item">
+            <span>Monthly EMI</span>
+            <strong id="emi-monthly-total">₹0</strong>
+          </div>
+          <div class="summary-item">
+            <span>Remaining amount</span>
+            <strong id="emi-remaining-total">₹0</strong>
+          </div>
+        </div>
+        <div class="table-scroll" role="region" aria-label="EMI details" tabindex="0">
+          <table class="data-table emi-table">
+            <thead>
+              <tr>
+                <th scope="col">EMI</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Months left</th>
+                <th scope="col">Total amount</th>
+                <th scope="col">EMI date</th>
+                <th scope="col">EMI bank</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="emi-list"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="management-section" aria-labelledby="credit-card-title">
+        <div class="section-heading management-heading">
+          <div>
+            <p class="eyebrow">CREDIT AT A GLANCE</p>
+            <h2 id="credit-card-title">Credit cards</h2>
+          </div>
+          <button id="add-credit-card" class="primary-button" type="button">
+            <span aria-hidden="true">+</span> Add card
+          </button>
+        </div>
+        <div class="summary-strip card-summary">
+          <div class="summary-item">
+            <span>Total limit</span>
+            <strong id="card-limit-total">₹0</strong>
+          </div>
+          <div class="summary-item">
+            <span>Due this month</span>
+            <strong id="card-due-total">₹0</strong>
+          </div>
+          <div class="summary-item">
+            <span>Pending / available</span>
+            <strong id="card-pending-total">₹0</strong>
+          </div>
+        </div>
+        <div class="table-scroll" role="region" aria-label="Credit card details" tabindex="0">
+          <table class="data-table card-table">
+            <thead>
+              <tr>
+                <th scope="col">Credit card name</th>
+                <th scope="col">Limit</th>
+                <th scope="col">Due</th>
+                <th scope="col">Pending</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="credit-card-list"></tbody>
+          </table>
+        </div>
+        <p class="section-note">Pending is calculated as card limit minus this month’s due. Card dues are included in monthly spending.</p>
+      </section>
+
+      <section class="transactions-section" aria-labelledby="transactions-title">
+        <div class="section-heading transactions-heading">
+          <div>
+            <p class="eyebrow">THE DETAILS</p>
+            <h2 id="transactions-title">Monthly transactions</h2>
+          </div>
+          <div class="transaction-actions">
+            <button id="add-income" class="primary-button income-action" type="button">
+              <span aria-hidden="true">+</span> Add income
+            </button>
+            <button id="add-spending" class="primary-button" type="button">
+              <span aria-hidden="true">+</span> Add spending
+            </button>
+          </div>
+        </div>
+        <label class="filter-label">
+          <span>Show</span>
+          <select id="transaction-filter" aria-label="Filter transactions">
+            <option value="all">All transactions</option>
+            <option value="income">Income only</option>
+            <option value="expense">Spending only</option>
+          </select>
+        </label>
+        <div id="transaction-list" class="expense-list"></div>
+      </section>
+
+      <footer class="footer-note">Your data is encrypted and stays on this device.</footer>
+    </main>
+
+    <dialog id="emi-dialog" class="expense-dialog" aria-labelledby="emi-dialog-title">
+      <form id="emi-form" class="expense-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">MONTHLY COMMITMENT</p>
+            <h2 id="emi-dialog-title">Add an EMI</h2>
+          </div>
+          <button id="close-emi-dialog" class="icon-button close-button" type="button" aria-label="Close">×</button>
+        </div>
+        <input id="emi-id" type="hidden">
+        <label class="field">
+          <span>EMI name</span>
+          <input id="emi-name" type="text" maxlength="60" placeholder="e.g. Phone EMI" required>
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Monthly amount</span>
+            <input id="emi-amount" type="number" min="0.01" step="0.01" inputmode="decimal" required>
+          </label>
+          <label class="field">
+            <span>Months left</span>
+            <input id="emi-months" type="number" min="1" step="1" inputmode="numeric" required>
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field">
+            <span>EMI date (day of month)</span>
+            <input id="emi-day" type="number" min="1" max="31" step="1" inputmode="numeric" placeholder="e.g. 2" required>
+          </label>
+          <label class="field">
+            <span>Bank / lender</span>
+            <input id="emi-bank" type="text" maxlength="50" placeholder="e.g. SBI" required>
+          </label>
+        </div>
+        <p class="form-hint">The EMI starts in the selected month. Total amount is monthly amount × months left.</p>
+        <p id="emi-form-error" class="form-error" role="alert" hidden></p>
+        <button class="primary-button submit-button" type="submit">Save EMI</button>
+      </form>
+    </dialog>
+
+    <dialog id="credit-card-dialog" class="expense-dialog" aria-labelledby="card-dialog-title">
+      <form id="credit-card-form" class="expense-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">CREDIT ACCOUNT</p>
+            <h2 id="card-dialog-title">Add a credit card</h2>
+          </div>
+          <button id="close-card-dialog" class="icon-button close-button" type="button" aria-label="Close">×</button>
+        </div>
+        <input id="card-id" type="hidden">
+        <label class="field">
+          <span>Credit card name</span>
+          <input id="card-name" type="text" maxlength="60" placeholder="e.g. HDFC Card" required>
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Card limit</span>
+            <input id="card-limit" type="number" min="0" step="0.01" inputmode="decimal" required>
+          </label>
+          <label class="field">
+            <span>Due this month</span>
+            <input id="card-due" type="number" min="0" step="0.01" inputmode="decimal" required>
+          </label>
+        </div>
+        <p class="form-hint">The due amount is saved for the selected month and included in that month’s spending.</p>
+        <p id="card-form-error" class="form-error" role="alert" hidden></p>
+        <button class="primary-button submit-button" type="submit">Save credit card</button>
+      </form>
+    </dialog>
+
+    <dialog id="transaction-dialog" class="expense-dialog" aria-labelledby="dialog-title">
+      <form id="transaction-form" class="expense-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">NEW ENTRY</p>
+            <h2 id="dialog-title">Add a transaction</h2>
+          </div>
+          <button id="close-dialog" class="icon-button close-button" type="button" aria-label="Close">×</button>
+        </div>
+
+        <label class="field">
+          <span>Type</span>
+          <select id="transaction-type" name="type" required>
+            <option value="expense">Spent</option>
+            <option value="income">Income</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span id="transaction-name-label">What was it for?</span>
+          <input id="transaction-name" name="name" type="text" maxlength="60" placeholder="e.g. Weekly groceries" required>
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Amount</span>
+            <input id="transaction-amount" name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required>
+          </label>
+          <label class="field">
+            <span>Date</span>
+            <input id="transaction-date" name="date" type="date" required>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Category</span>
+          <select id="transaction-category" name="category" required>
+          </select>
+        </label>
+
+        <p id="form-error" class="form-error" role="alert" hidden></p>
+        <button class="primary-button submit-button" type="submit">Save transaction</button>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
